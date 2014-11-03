@@ -28,14 +28,14 @@ function initialize($dirname) {
 	$hub_nodes = array();
 	
 	foreach ($pieces as $piece) {
-		$pos1 = strpos($piece, 'ru/hub')+7; // take top most hubs
+		$pos1 = strpos($piece, 'ru/hub')+7; 
 		$len = strpos($piece, '/', $pos1) - $pos1;
 		array_push($hub_nodes, substr($piece, $pos1, $len));
 	};
 
 	// finally the list of hubs is extracted
 	if (sizeof($hub_nodes) == 40){
-		$hub_nodes = array_slice($hub_nodes, 0, 5);
+		$hub_nodes = array_slice($hub_nodes, 0, 20); // take top most hubs
 	};
 	
 	
@@ -64,11 +64,15 @@ function initialize($dirname) {
 				$hub_page =  file_get_contents($url);
 				fwrite($f, $hub_page);
 				
+				sleep(2); // wait for some time before retrieving the next page
 				$page = $page + 1;
 				
-			} while ((!$hub_page )or ($page<10));
+			} while ((!$hub_page )or ($page<50));
 			
 			fclose($f);
+			
+			$update_url = "http://rost.1gb.ru/update.php?hub=".$hub_name;
+			$tmp = file_get_contents($update_url);
 		}; 	
 	};
 
@@ -92,7 +96,8 @@ function main(){
 		$hub_list = "<hr />";
 		foreach ($dirList as $value) {
 			if (($value !== '.') and ($value !== '..')){
-				$link = 'Data for <a href="hubs/'.$value.'/data.html"> '.$value.'</a><br />';
+				$link = 'List of posts <a href="hubs/'.$value.'/list.html"> '.$value.'</a>.';
+				$link = $link.' Update the list for <a href="http://rost.1gb.ru/update.php?hub='.$value.'"> '.$value.'</a> hub.<br />';
 				$hub_list = $hub_list.$link."\n";
 			};
 		};
