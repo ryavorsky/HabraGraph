@@ -13,13 +13,14 @@ $out = '';
 
 function initialize($dirname) {
 
+	// First, get the Hubs page and extract the list of most populat hubs
 	if (!file_exists('habr.txt')) { 
 		$habr_hubs_page = file_get_contents('http://habrahabr.ru/hubs/');
 		$f = fopen('habr.txt', 'w');
 		fwrite($f, $habr_hubs_page);
 		fclose($f);
 	} else {
-		$habr_hubs_page = file_get_contents('habr.txt');
+		$habr_hubs_page = file_get_contents('habr.txt'); // the page is cashed locally to avoid repeated calls 
 	}; 	
 
 	$pieces = explode("hub ", $habr_hubs_page);
@@ -27,21 +28,46 @@ function initialize($dirname) {
 	$hub_nodes = array();
 	
 	foreach ($pieces as $piece) {
-		$pos1 = strpos($piece, 'ru/hub')+7;
+		$pos1 = strpos($piece, 'ru/hub')+7; // take top most hubs
 		$len = strpos($piece, '/', $pos1) - $pos1;
 		array_push($hub_nodes, substr($piece, $pos1, $len));
 	};
 
+	// finally the list of hubs is extracted
 	if (sizeof($hub_nodes) == 40){
 		$hub_nodes = array_slice($hub_nodes, 0, 5);
 	};
 	
+	
+	// Now for each hub create sub-folder and retrieve the history into the data.txt file
 	foreach ($hub_nodes as $hub_name) {
+	
+		// First, create the folder 
 		if (!file_exists($dirname.'/'.$hub_name)) { 
 			mkdir($dirname.'/'.$hub_name, 0777, true);
-			$hub_page = file_get_contents('http://habrahabr.ru/hub/'.$hub_name.'/');
-			$f = fopen($dirname.'/'.$hub_name.'/data.html', 'w');
-			fwrite($f, $hub_page);
+
+			// Then open the file to store the hub pages 
+			$f = fopen($dirname.'/'.$hub_name.'/data.txt', 'a');
+			$page = 1;
+			
+			do {
+				// Construct the URL for the page
+				if($page > 1){
+					$url = 'http://habrahabr.ru/hub/'.$hub_name.'/page'.$page.'/';
+					echo $url.'<br />';
+					
+				} else {
+					$url = 'http://habrahabr.ru/hub/'.$hub_name.'/';
+				};
+				
+				// Retrieve the data and save it to the file
+				$hub_page =  file_get_contents($url);
+				fwrite($f, $hub_page);
+				
+				$page = $page + 1;
+				
+			} while ((!$hub_page )or ($page<10));
+			
 			fclose($f);
 		}; 	
 	};
