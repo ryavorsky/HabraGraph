@@ -1,0 +1,19 @@
+.ugolkrug {
+	color: #0000; /* цвет текста */
+	background:#FF7F00; /* фон блока */
+	border: 3px #CCCCCC solid; /* стили рамки */
+	border-radius: 40px;
+	margin-left: 0;
+}
+.fig {
+    text-align: center;
+	margin-left: 0;
+}
+.tex {
+    display: block; /* Блочный элемент (для старых браузеров) */
+    text-align: center; /* Выравнивание по центру */
+    font-style: italic; /* Курсивное начертание */
+    margin-top: 0; /* Отступ сверху */
+    margin-bottom: 5px; /* Отступ снизу */
+    color: #666;
+}
